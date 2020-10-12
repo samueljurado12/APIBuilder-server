@@ -12,6 +12,7 @@
    },
    "dependencies": {
       "api-builder-types": "file:../Api-Builder-Types",
+      "guid-typescript": "^1.0.9",
       "mysql": "^2.14.1",
       "reflect-metadata": "^0.1.10",
       "typeorm": "0.2.28"
