@@ -4,7 +4,7 @@ import { Guid } from "guid-typescript";
 
 
 @Entity()
-export class User {
+class User {
 
     @PrimaryColumn({
         type: "varchar"
@@ -24,3 +24,5 @@ export class User {
     projects: Project[];
 
 }
+
+export default User;
