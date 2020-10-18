@@ -1,8 +1,10 @@
-import {Entity, Column, PrimaryColumn, ManyToOne, OneToOne} from "typeorm";
-import { Guid } from "guid-typescript";
+import {
+    Entity, Column, PrimaryColumn, ManyToOne, OneToOne,
+} from 'typeorm';
+import { Guid } from 'guid-typescript';
 
-import { User } from "./User";
-import { Schema } from "./Schema";
+import User from './User';
+import Schema from './Schema';
 
 export enum ProjectType {
     Relational = 'Relational',
@@ -10,33 +12,33 @@ export enum ProjectType {
 }
 
 @Entity()
-export class Project {
+class Project {
     @PrimaryColumn({
-        type: "varchar"
-        }
-    )
+        type: 'varchar',
+    })
     id: Guid;
 
-    @ManyToOne(type => User, user => user.projects, {
+    @ManyToOne(() => User, (user) => user.projects, {
         nullable: false,
-        onDelete: "CASCADE"
+        onDelete: 'CASCADE',
     })
     owner: User;
 
     @Column({
-            type: "varchar",
-            length: 50
-        }
-    )
+        type: 'varchar',
+        length: 50,
+    })
     name: string;
 
     @Column({
-        type: "enum",
+        type: 'enum',
         enum: ProjectType,
-        default: ProjectType.Relational
+        default: ProjectType.Relational,
     })
     type: ProjectType;
 
-    @OneToOne(type => Schema, schema => schema.project, { nullable: false })
+    @OneToOne(() => Schema, (schema) => schema.project, { nullable: false })
     schema: Schema;
 }
+
+export default Project;

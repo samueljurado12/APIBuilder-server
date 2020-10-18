@@ -1,21 +1,24 @@
-import {Entity, PrimaryColumn, OneToOne, JoinColumn} from "typeorm";
-import { Guid } from "guid-typescript";
+import {
+    Entity, PrimaryColumn, OneToOne, JoinColumn,
+} from 'typeorm';
+import { Guid } from 'guid-typescript';
 
-import {Project} from "./Project"
+import Project from './Project';
 
 @Entity()
-export abstract class Schema {
+abstract class Schema {
     @PrimaryColumn({
-        type: "varchar"
+        type: 'varchar',
     })
     id: Guid;
 
-    @OneToOne(type => Project, project => project.schema,
+    @OneToOne(() => Project, (project) => project.schema,
         {
             nullable: false,
-            onDelete: "CASCADE"
+            onDelete: 'CASCADE',
         })
     @JoinColumn()
     project: Project;
-
 }
+
+export default Schema;

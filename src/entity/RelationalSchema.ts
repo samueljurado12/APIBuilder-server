@@ -1,8 +1,10 @@
-import {Entity} from "typeorm";
+import { Entity } from 'typeorm';
 
-import {Schema} from "./Schema";
+import Schema from './Schema';
 
 @Entity()
-export class RelationalSchema extends Schema {
+class RelationalSchema extends Schema {
 
 }
+
+export default RelationalSchema;
