@@ -1,0 +1,9 @@
+{
+  "extends": ["airbnb-typescript/base"],
+  "rules": {
+    "@typescript-eslint/indent": ["error", 4]
+  },
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  }
+}
