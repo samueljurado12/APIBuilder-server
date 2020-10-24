@@ -1,9 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+    Entity, Column, OneToMany, PrimaryColumn,
+} from 'typeorm';
+import { Guid } from 'guid-typescript';
+import Project from './Project';
 
 @Entity()
 class User {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryColumn({
+        type: 'varchar',
+    })
+    id: Guid;
 
     @Column()
     firstName: string;
@@ -13,6 +19,9 @@ class User {
 
     @Column()
     age: number;
+
+    @OneToMany(() => Project, (project) => project.owner)
+    projects: Project[];
 }
 
 export default User;

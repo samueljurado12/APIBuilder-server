@@ -3,7 +3,7 @@
    "version": "0.0.1",
    "description": "Awesome project developed with TypeORM.",
    "devDependencies": {
-      "@types/node": "^8.0.29",
+      "@types/node": "^12.12.6",
       "@typescript-eslint/eslint-plugin": "^4.4.0",
       "eslint": "^7.11.0",
       "eslint-config-airbnb-typescript": "^11.0.0",
@@ -13,6 +13,7 @@
    },
    "dependencies": {
       "api-builder-types": "file:../Api-Builder-Types",
+      "guid-typescript": "^1.0.9",
       "mysql": "^2.14.1",
       "reflect-metadata": "^0.1.10",
       "typeorm": "0.2.28"
