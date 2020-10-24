@@ -34,19 +34,19 @@ class JsonProperty {
     jsonEntity: JsonEntity;
 
     @Column({
-        type: "enum",
+        type: 'enum',
         enum: PropertyType,
-        default: PropertyType.STRING
+        default: PropertyType.STRING,
     })
     type: PropertyType;
 
-    @ManyToOne(()=>JsonEntity, entity => entity.typeProperties)
-    typeEntity: JsonEntity
+    @ManyToOne(() => JsonEntity, (entity) => entity.typeProperties)
+    typeEntity: JsonEntity;
 
     @Column({
-        type: "boolean",
+        type: 'boolean',
         nullable: false,
-        default: false
+        default: false,
     })
     listInd: boolean;
 }
