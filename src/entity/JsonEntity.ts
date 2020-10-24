@@ -27,6 +27,9 @@ class JsonEntity {
             onDelete: 'CASCADE',
         })
     properties: JsonProperty[];
+
+    @OneToMany(() => JsonProperty, prop => prop.typeEntity)
+    typeProperties: JsonProperty[]
 }
 
 export default JsonEntity;
