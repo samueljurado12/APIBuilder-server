@@ -4,7 +4,6 @@ import {
 import { Guid } from 'guid-typescript';
 import RelationalSchema from './RelationalSchema';
 import SQLColumn from './SQLColumn';
-import Constraint from './Constraint';
 
 @Entity()
 class SQLTable {
@@ -29,8 +28,6 @@ class SQLTable {
     })
     columns: SQLColumn[];
 
-    @OneToMany(() => Constraint, (constraint) => constraint.table)
-    constraints: Constraint[];
 }
 
 export default SQLTable;

@@ -6,7 +6,6 @@ import SQLTable from './SQLTable';
 
 enum SQLType {
     VARCHAR = 'varchar',
-    TEXT = 'text',
     INT = 'int',
     BIGINT = 'bigint',
     FLOAT = 'float',
@@ -36,6 +35,13 @@ class SQLColumn {
         default: false,
     })
     nullableInd: boolean;
+
+    @Column({
+        type: 'boolean',
+        nullable: false,
+        default: false
+    })
+    primaryKeyInd: boolean
 
     @Column({
         type: 'varchar',
