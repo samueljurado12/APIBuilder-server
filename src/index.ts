@@ -1,7 +1,10 @@
 import 'reflect-metadata';
-import { createConnection } from 'typeorm';
+import {createConnection} from 'typeorm';
 import * as express from "express";
 import { Application, Request, Response } from "express";
+import Project from "./entity/Project";
+import ResponseProject from "./Response/ResponseProject";
+import ResponseProjects from "./Response/ResponseProjects";
 
 
 const app: Application = express();
@@ -24,6 +27,16 @@ createConnection().then(async (connection) => {
             });
         }
     );
+
+    app.get(
+        "/api/project/all",
+        async(req: Request, res: Response): Promise<Response> => {
+            const dbProjects: Project[] = await connection.getRepository(Project).find();
+            const data: ResponseProjects = new ResponseProjects();
+            dbProjects.forEach(p => data.projects.push(new ResponseProject(p.id.toString(), p.name, p.type, '')));
+            return res.json(data)
+        }
+    )
 
     try {
         app.listen(port, (): void => {
