@@ -1,13 +1,13 @@
 import {
-    Entity, Column, ManyToOne, PrimaryColumn,
+    Entity, Column, ManyToOne, PrimaryColumn, JoinColumn,
 } from 'typeorm';
 import ProjectEntity from './ProjectEntity';
 
 export enum AttributeType {
-    String,
-    Date,
-    Bool,
-    Numeric
+    String = 'String',
+    Date = 'Date',
+    Bool = 'Bool',
+    Numeric = 'Numeric'
 }
 
 @Entity()
@@ -37,6 +37,7 @@ class Attribute {
     @ManyToOne(() => ProjectEntity,
         (entity) => entity.attributes,
         { onDelete: 'CASCADE' })
+    @JoinColumn()
     entity: ProjectEntity;
 }
 

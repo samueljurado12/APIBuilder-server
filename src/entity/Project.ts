@@ -1,5 +1,5 @@
 import {
-    Entity, Column, PrimaryColumn, ManyToOne, OneToMany,
+    Entity, Column, PrimaryColumn, ManyToOne, OneToMany, JoinColumn,
 } from 'typeorm';
 
 import User from './User';
@@ -17,12 +17,6 @@ class Project {
     })
     id: string;
 
-    @ManyToOne(() => User, (user) => user.projects, {
-        nullable: false,
-        onDelete: 'CASCADE',
-    })
-    owner: User;
-
     @Column({
         type: 'varchar',
         length: 50,
@@ -31,7 +25,7 @@ class Project {
 
     @Column({
         type: 'varchar',
-        length: 500,
+        length: 5000,
     })
     description: string;
 
@@ -41,6 +35,13 @@ class Project {
         default: ProjectType.Relational,
     })
     type: ProjectType;
+
+    @ManyToOne(() => User, (user) => user.projects, {
+        nullable: false,
+        onDelete: 'CASCADE',
+    })
+    @JoinColumn()
+    owner: User;
 
     @OneToMany(() => ProjectEntity,
         (entity) => entity.project,

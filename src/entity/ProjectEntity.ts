@@ -4,8 +4,9 @@ import {
 
 import Project from './Project';
 import Attribute from './Attribute';
+import Relationship from './Relationship';
 
-@Entity()
+@Entity({ name: 'entity' })
 abstract class ProjectEntity {
     @PrimaryColumn({
         type: 'varchar',
@@ -26,9 +27,12 @@ abstract class ProjectEntity {
     name: string;
 
     @OneToMany(() => Attribute,
-        (attribute) => attribute.entity,
-        { onDelete: 'CASCADE' })
+        (attribute) => attribute.entity)
     attributes: Attribute[];
+
+    @OneToMany(() => Relationship,
+        (rel) => rel.leftSide)
+    relationships: Relationship[];
 }
 
 export default ProjectEntity;
