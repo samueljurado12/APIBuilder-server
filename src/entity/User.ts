@@ -1,7 +1,6 @@
 import {
     Entity, Column, OneToMany, PrimaryColumn,
 } from 'typeorm';
-import { Guid } from 'guid-typescript';
 import Project from './Project';
 
 @Entity()
@@ -9,7 +8,7 @@ class User {
     @PrimaryColumn({
         type: 'varchar',
     })
-    id: Guid;
+    id: string;
 
     @Column()
     firstName: string;
