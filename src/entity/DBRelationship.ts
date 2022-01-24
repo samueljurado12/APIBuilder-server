@@ -1,31 +1,31 @@
 import {
     Entity, Column, ManyToOne, PrimaryColumn, JoinColumn,
 } from 'typeorm';
-import ProjectEntity from './ProjectEntity';
-import Attribute from './Attribute';
+import DBEntity from './DBEntity';
+import DBAttribute from './DBAttribute';
 
-@Entity()
-class Relationship {
+@Entity({name:"relationship"})
+class DBRelationship {
     @PrimaryColumn({
         type: 'varchar',
     })
     id: string;
 
-    @ManyToOne(() => ProjectEntity,
+    @ManyToOne(() => DBEntity,
         (entity) => entity.relationships,
         { onDelete: 'CASCADE' })
     @JoinColumn()
-    leftSide: ProjectEntity;
+    leftSide: DBEntity;
 
     @Column({
         type: 'varchar',
     })
-    rightSide:ProjectEntity;
+    rightSide:DBEntity;
 
     @Column({
         type: 'varchar',
     })
-    referencedPK:Attribute;
+    referencedPK:DBAttribute;
 }
 
-export default Relationship;
+export default DBRelationship;

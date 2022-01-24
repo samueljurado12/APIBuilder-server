@@ -2,16 +2,12 @@ import {
     Entity, Column, PrimaryColumn, ManyToOne, OneToMany, JoinColumn,
 } from 'typeorm';
 
-import User from './User';
-import ProjectEntity from './ProjectEntity';
+import User from './DBUser';
+import DBEntity from './DBEntity';
+import {ProjectType} from "../../../Api-Builder-Types";
 
-export enum ProjectType {
-    Relational = 'Relational',
-    NonRelational = 'NonRelational'
-}
-
-@Entity()
-class Project {
+@Entity({name:"project"})
+class DBProject {
     @PrimaryColumn({
         type: 'varchar',
     })
@@ -43,10 +39,11 @@ class Project {
     @JoinColumn()
     owner: User;
 
-    @OneToMany(() => ProjectEntity,
+    @OneToMany(() => DBEntity,
         (entity) => entity.project,
         { onDelete: 'CASCADE' })
-    entities: ProjectEntity[];
+    entities: DBEntity[];
+
 }
 
-export default Project;
+export default DBProject;

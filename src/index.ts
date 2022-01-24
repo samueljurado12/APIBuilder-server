@@ -2,7 +2,9 @@ import 'reflect-metadata';
 import { createConnection } from 'typeorm';
 import * as express from 'express';
 import { Application, Request, Response } from 'express';
-import Project from './entity/Project';
+import DBProject from './entity/DBProject';
+import Project from "./TypeImplementation/Project";
+import ProjectConfig from "./TypeImplementation/ProjectConfig";
 
 const app: Application = express();
 const port = 3000;
@@ -24,7 +26,9 @@ createConnection().then(async (connection) => {
     app.get(
         '/api/project/all',
         async (req: Request, res: Response): Promise<Response> => {
-            const projects: Project[] = await connection.getRepository(Project).find();
+            const dbProjects: DBProject[] = await connection.getRepository(DBProject).find();
+            let projects : Project[] = []
+            dbProjects.forEach(dbp => projects.push(new Project(dbp)))
             return res.status(200).send({
                 projects,
             });
@@ -34,11 +38,15 @@ createConnection().then(async (connection) => {
     app.get(
         '/api/project/:id',
         async (req: Request, res: Response): Promise<Response> => {
-            const project: Project = await connection.getRepository(Project)
-                .findOne({ id: req.params.id });
-            if (project) {
+            const dbProject: DBProject = await connection.getRepository(DBProject)
+                .findOne({ id: req.params.id },
+                    {
+                        relations: ["entities", "entities.attributes", "entities.relationships"]
+                    });
+            if (dbProject) {
+                let projectConfig: ProjectConfig = new ProjectConfig()
                 res.status(200).send({
-                    project,
+                    dbProject,
                 });
             } else {
                 res.status(404).send({

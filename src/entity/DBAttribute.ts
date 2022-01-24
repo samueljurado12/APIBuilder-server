@@ -1,17 +1,11 @@
 import {
     Entity, Column, ManyToOne, PrimaryColumn, JoinColumn,
 } from 'typeorm';
-import ProjectEntity from './ProjectEntity';
-
-export enum AttributeType {
-    String = 'String',
-    Date = 'Date',
-    Bool = 'Bool',
-    Numeric = 'Numeric'
-}
+import DBEntity from './DBEntity';
+import {AttributeType} from "../../../Api-Builder-Types";
 
 @Entity()
-class Attribute {
+class DBAttribute {
     @PrimaryColumn({
         type: 'varchar',
     })
@@ -25,7 +19,12 @@ class Attribute {
     @Column({
         type: 'boolean',
     })
-    IsMandatory: boolean;
+    mandatoryInd: boolean;
+
+    @Column({
+        type: 'boolean',
+    })
+    primaryKeyInd: boolean;
 
     @Column({
         type: 'enum',
@@ -34,11 +33,11 @@ class Attribute {
     })
     type: string;
 
-    @ManyToOne(() => ProjectEntity,
+    @ManyToOne(() => DBEntity,
         (entity) => entity.attributes,
         { onDelete: 'CASCADE' })
     @JoinColumn()
-    entity: ProjectEntity;
+    entity: DBEntity;
 }
 
-export default Attribute;
+export default DBAttribute;
