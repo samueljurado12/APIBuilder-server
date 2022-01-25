@@ -1,10 +1,10 @@
 import {
     Entity, Column, ManyToOne, PrimaryColumn, JoinColumn,
 } from 'typeorm';
+import { AttributeType } from 'api-builder-types';
 import DBEntity from './DBEntity';
-import {AttributeType} from "../../../Api-Builder-Types";
 
-@Entity()
+@Entity({ name: 'attribute' })
 class DBAttribute {
     @PrimaryColumn({
         type: 'varchar',
@@ -31,7 +31,20 @@ class DBAttribute {
         enum: AttributeType,
         default: AttributeType.String,
     })
-    type: string;
+    type: AttributeType;
+
+    @Column({
+        type: 'varchar',
+        length: 255,
+        nullable: true,
+    })
+    defaultValue: string;
+
+    @Column({
+        type: 'int',
+        nullable: true,
+    })
+    precision: number;
 
     @ManyToOne(() => DBEntity,
         (entity) => entity.attributes,

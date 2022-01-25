@@ -2,9 +2,10 @@ import 'reflect-metadata';
 import { createConnection } from 'typeorm';
 import * as express from 'express';
 import { Application, Request, Response } from 'express';
+import { IProjectConfig } from 'api-builder-types';
 import DBProject from './entity/DBProject';
-import Project from "./TypeImplementation/Project";
-import ProjectConfig from "./TypeImplementation/ProjectConfig";
+import Project from './TypeImplementation/Project';
+import { parseDBConfig } from './Helper/DBConfigParser';
 
 const app: Application = express();
 const port = 3000;
@@ -27,8 +28,8 @@ createConnection().then(async (connection) => {
         '/api/project/all',
         async (req: Request, res: Response): Promise<Response> => {
             const dbProjects: DBProject[] = await connection.getRepository(DBProject).find();
-            let projects : Project[] = []
-            dbProjects.forEach(dbp => projects.push(new Project(dbp)))
+            const projects : Project[] = [];
+            dbProjects.forEach((dbp) => projects.push(new Project(dbp)));
             return res.status(200).send({
                 projects,
             });
@@ -41,13 +42,11 @@ createConnection().then(async (connection) => {
             const dbProject: DBProject = await connection.getRepository(DBProject)
                 .findOne({ id: req.params.id },
                     {
-                        relations: ["entities", "entities.attributes", "entities.relationships"]
+                        relations: ['entities', 'entities.attributes', 'entities.relationships'],
                     });
             if (dbProject) {
-                let projectConfig: ProjectConfig = new ProjectConfig()
-                res.status(200).send({
-                    dbProject,
-                });
+                const projectConfig: IProjectConfig = parseDBConfig(dbProject);
+                res.status(200).json(projectConfig);
             } else {
                 res.status(404).send({
                     error: `Project with id '${req.params.id}' not found.`,

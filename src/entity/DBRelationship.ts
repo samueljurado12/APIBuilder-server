@@ -2,9 +2,8 @@ import {
     Entity, Column, ManyToOne, PrimaryColumn, JoinColumn,
 } from 'typeorm';
 import DBEntity from './DBEntity';
-import DBAttribute from './DBAttribute';
 
-@Entity({name:"relationship"})
+@Entity({ name: 'relationship' })
 class DBRelationship {
     @PrimaryColumn({
         type: 'varchar',
@@ -20,12 +19,12 @@ class DBRelationship {
     @Column({
         type: 'varchar',
     })
-    rightSide:DBEntity;
+    rightSide: string;
 
     @Column({
         type: 'varchar',
     })
-    referencedPK:DBAttribute;
+    referencedPK: string;
 }
 
 export default DBRelationship;

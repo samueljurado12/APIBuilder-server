@@ -2,11 +2,11 @@ import {
     Entity, Column, PrimaryColumn, ManyToOne, OneToMany, JoinColumn,
 } from 'typeorm';
 
+import { ProjectType } from 'api-builder-types';
 import User from './DBUser';
 import DBEntity from './DBEntity';
-import {ProjectType} from "../../../Api-Builder-Types";
 
-@Entity({name:"project"})
+@Entity({ name: 'project' })
 class DBProject {
     @PrimaryColumn({
         type: 'varchar',
@@ -43,7 +43,6 @@ class DBProject {
         (entity) => entity.project,
         { onDelete: 'CASCADE' })
     entities: DBEntity[];
-
 }
 
 export default DBProject;
