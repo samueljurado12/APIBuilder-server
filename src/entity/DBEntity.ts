@@ -19,12 +19,12 @@ class DBEntity {
     name: string;
 
     @Column({
-        type: "int"
+        type: 'int',
     })
     xPos: number;
 
     @Column({
-        type: "int"
+        type: 'int',
     })
     yPos: number;
 

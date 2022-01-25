@@ -3,7 +3,7 @@ import {
 } from 'typeorm';
 import DBProject from './DBProject';
 
-@Entity({name:"user"})
+@Entity({ name: 'user' })
 class DBUser {
     @PrimaryColumn({
         type: 'varchar',
@@ -17,15 +17,15 @@ class DBUser {
     lastName: string;
 
     @Column({
-        nullable: true
+        nullable: true,
     })
     age: number;
 
     @Column({
-        type: "varchar",
-        length: 256
+        type: 'varchar',
+        length: 256,
     })
-    hashedPassword: string
+    hashedPassword: string;
 
     @OneToMany(() => DBProject, (project) => project.owner)
     projects: DBProject[];
