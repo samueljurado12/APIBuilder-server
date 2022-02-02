@@ -42,7 +42,11 @@ createConnection().then(async (connection) => {
             const dbProject: DBProject = await connection.getRepository(DBProject)
                 .findOne({ id: req.params.id },
                     {
-                        relations: ['entities', 'entities.attributes', 'entities.relationships'],
+                        relations: ['entities',
+                            'entities.attributes',
+                            'entities.relationships',
+                            'entities.constraints'
+                        ],
                     });
             if (dbProject) {
                 const projectConfig: IProjectConfig = parseDBConfig(dbProject);

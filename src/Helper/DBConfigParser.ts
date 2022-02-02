@@ -1,9 +1,10 @@
-import { IAttribute, IEntity, IRelationship } from 'api-builder-types';
+import {IAttribute, IConstraint, IEntity, IRelationship} from 'api-builder-types';
 import DBProject from '../entity/DBProject';
 import ProjectConfig from '../TypeImplementation/ProjectConfig';
 import Entity from '../TypeImplementation/Entity';
 import Attribute from '../TypeImplementation/Attribute';
 import Relationship from '../TypeImplementation/Relationship';
+import Constraint from "../TypeImplementation/Constraint";
 
 export const parseDBConfig = (dbProject: DBProject): ProjectConfig => {
     const projectConfig: ProjectConfig = new ProjectConfig(dbProject.description, dbProject.id,
@@ -19,6 +20,9 @@ export const parseDBConfig = (dbProject: DBProject): ProjectConfig => {
             .map<IRelationship>(
             (dbRel) => new Relationship(dbRel.id, dbRel.rightSide, dbRel.referencedPK),
         );
+        entity.Constraints = dbEnt.constraints.map<IConstraint>((dbConstraint) =>
+             new Constraint(dbConstraint.attributes.split('|'), dbConstraint.id, dbConstraint.type)
+        )
         return entity;
     });
     return projectConfig;
