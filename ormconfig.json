@@ -2,9 +2,9 @@
    "type": "mysql",
    "host": "localhost",
    "port": 3306,
-   "username": "[USERNAME]",
-   "password": "[PASSWORD]",
-   "database": "[DBNAME]",
+   "username": "DBAccess",
+   "password": "tfg_2020_DB",
+   "database": "api-builder",
    "synchronize": true,
    "logging": false,
    "entities": [
