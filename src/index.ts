@@ -60,6 +60,30 @@ createConnection().then(async (connection) => {
         },
     );
 
+    app.post(
+        'api/project',
+        async (req: Request, res: Response): Promise<Response> => {
+            return res.status(200)
+        }
+    )
+
+    app.delete(
+        'api/project/:id',
+        async (req: Request, res: Response): Promise<Response> => {
+            const dbProject: DBProject = await connection.getRepository(DBProject)
+                .findOne({ id: req.params.id });
+            if (dbProject){
+                await connection.getRepository(DBProject).remove(dbProject);
+                res.status(200)
+            } else {
+                res.status(404).send({
+                    error: `Project with id '${req.params.id}' not found.`,
+                });
+            }
+            return res;
+        }
+    )
+
     try {
         app.listen(port, (): void => {
             console.log(`Connected successfully on port ${port}`);
