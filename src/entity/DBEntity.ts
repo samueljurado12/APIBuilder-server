@@ -5,7 +5,7 @@ import {
 import DBProject from './DBProject';
 import DBAttribute from './DBAttribute';
 import DBRelationship from './DBRelationship';
-import DBConstraint from "./DBConstraint";
+import DBConstraint from './DBConstraint';
 
 @Entity({ name: 'entity' })
 class DBEntity {
@@ -37,7 +37,7 @@ class DBEntity {
         (rel) => rel.leftSide)
     relationships: DBRelationship[];
 
-    @OneToMany( () => DBConstraint,
+    @OneToMany(() => DBConstraint,
         (constraint) => constraint.entity)
     constraints: DBConstraint[];
 
