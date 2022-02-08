@@ -5,8 +5,12 @@ import { Application, Request, Response } from 'express';
 import { IProject, IProjectConfig } from 'api-builder-types';
 import DBProject from './entity/DBProject';
 import Project from './TypeImplementation/Project';
-import { parseDBToConfig } from './Helper/DBConfigParser';
-import DBUser from "./entity/DBUser";
+import { parseConfigToDB, parseDBToConfig } from './Helper/DBConfigParser';
+import DBUser from './entity/DBUser';
+import DBEntity from './entity/DBEntity';
+import DBAttribute from './entity/DBAttribute';
+import DBConstraint from './entity/DBConstraint';
+import DBRelationship from './entity/DBRelationship';
 
 const app: Application = express();
 const port = 3000;
@@ -53,7 +57,7 @@ createConnection().then(async (connection) => {
                         ],
                     });
             if (dbProject) {
-                const projectConfig: IProjectConfig = parseDBToConfig(dbProject);
+                const projectConfig: IProjectConfig = await parseDBToConfig(dbProject);
                 res.status(200).json(projectConfig);
             } else {
                 res.status(404).send({
@@ -73,22 +77,41 @@ createConnection().then(async (connection) => {
             dbProject.name = project.Name;
             dbProject.type = project.Type;
             dbProject.description = project.Description;
-            //TODO Change to current user after adding oauth.
+            // TODO Change to current user after adding oauth.
             dbProject.owner = await connection.getRepository(DBUser).findOne();
             try {
                 await connection.getRepository(DBProject).save(dbProject);
             } catch (e) {
-                console.log(e)
+                console.log(e);
             }
             return res.status(200).json(project);
         },
     );
 
+    app.post(
+        '/api/projectConfig',
+        async (req: Request, res: Response): Promise<Response> => {
+            const config: IProjectConfig = req.body as IProjectConfig;
+            const [dbProject, dbEntities, dbAttributes,
+                dbConstraints, dbRelationships] = await parseConfigToDB(config, connection);
+            try {
+                await connection.getRepository(DBProject).save(dbProject);
+                await connection.getRepository(DBEntity).save(dbEntities);
+                await connection.getRepository(DBAttribute).save(dbAttributes);
+                await connection.getRepository(DBConstraint).save(dbConstraints);
+                await connection.getRepository(DBRelationship).save(dbRelationships);
+            } catch (e) {
+                console.log(e);
+            }
+            return res.status(200).json(config);
+        },
+    );
+
     app.delete(
-        'api/project/:id',
+        '/api/project/:id',
         async (req: Request, res: Response): Promise<Response> => {
             await connection.getRepository(DBProject).delete(req.params.id);
-            return res.status(200);
+            return res.status(200).json({ message: 'Deleted succesfully' });
         },
     );
 

@@ -1,11 +1,20 @@
 import {
     Column, Entity, JoinColumn, ManyToOne, PrimaryColumn,
 } from 'typeorm';
-import { ConstraintType } from 'api-builder-types';
+import { ConstraintType, IConstraint } from 'api-builder-types';
 import DBEntity from './DBEntity';
 
 @Entity({ name: 'constraint' })
 class DBConstraint {
+    constructor(constraint: IConstraint, entity: DBEntity) {
+        if (constraint !== undefined) {
+            this.id = constraint.Identifier;
+            this.entity = entity;
+            this.attributes = constraint.Attributes.join('|');
+            this.type = constraint.Type;
+        }
+    }
+
     @PrimaryColumn({
         type: 'varchar',
     })
@@ -29,6 +38,7 @@ class DBConstraint {
         {
             nullable: false,
             onDelete: 'CASCADE',
+            cascade: true,
         })
     @JoinColumn()
     entity: DBEntity;
