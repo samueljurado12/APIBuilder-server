@@ -1,11 +1,24 @@
 import {
     Entity, Column, ManyToOne, PrimaryColumn, JoinColumn,
 } from 'typeorm';
-import { AttributeType } from 'api-builder-types';
+import { AttributeType, IAttribute } from 'api-builder-types';
 import DBEntity from './DBEntity';
 
 @Entity({ name: 'attribute' })
 class DBAttribute {
+    constructor(attribute: IAttribute, entity: DBEntity, isPK: boolean) {
+        if (attribute !== undefined) {
+            this.id = attribute.Identifier;
+            this.name = attribute.Name;
+            this.type = attribute.Type;
+            this.primaryKeyInd = isPK;
+            this.mandatoryInd = attribute.IsMandatory;
+            this.defaultValue = attribute.DefaultValue;
+            this.precision = attribute.Precision;
+            this.entity = entity;
+        }
+    }
+
     @PrimaryColumn({
         type: 'varchar',
     })
@@ -48,7 +61,10 @@ class DBAttribute {
 
     @ManyToOne(() => DBEntity,
         (entity) => entity.attributes,
-        { onDelete: 'CASCADE' })
+        {
+            onDelete: 'CASCADE',
+            cascade: true,
+        })
     @JoinColumn()
     entity: DBEntity;
 }

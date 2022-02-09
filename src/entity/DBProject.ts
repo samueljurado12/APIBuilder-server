@@ -20,8 +20,7 @@ class DBProject {
     name: string;
 
     @Column({
-        type: 'varchar',
-        length: 5000,
+        type: 'text',
     })
     description: string;
 

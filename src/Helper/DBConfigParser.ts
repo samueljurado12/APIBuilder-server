@@ -1,12 +1,19 @@
-import {IAttribute, IConstraint, IEntity, IRelationship} from 'api-builder-types';
+import {
+    IAttribute, IConstraint, IEntity, IProjectConfig, IRelationship,
+} from 'api-builder-types';
+import { Connection } from 'typeorm';
 import DBProject from '../entity/DBProject';
 import ProjectConfig from '../TypeImplementation/ProjectConfig';
 import Entity from '../TypeImplementation/Entity';
 import Attribute from '../TypeImplementation/Attribute';
 import Relationship from '../TypeImplementation/Relationship';
-import Constraint from "../TypeImplementation/Constraint";
+import Constraint from '../TypeImplementation/Constraint';
+import DBEntity from '../entity/DBEntity';
+import DBAttribute from '../entity/DBAttribute';
+import DBConstraint from '../entity/DBConstraint';
+import DBRelationship from '../entity/DBRelationship';
 
-export const parseDBConfig = (dbProject: DBProject): ProjectConfig => {
+export const parseDBToConfig = async (dbProject: DBProject): Promise<ProjectConfig> => {
     const projectConfig: ProjectConfig = new ProjectConfig(dbProject.description, dbProject.id,
         dbProject.type);
     projectConfig.Entities = dbProject.entities.map<IEntity>((dbEnt) => {
@@ -20,10 +27,33 @@ export const parseDBConfig = (dbProject: DBProject): ProjectConfig => {
             .map<IRelationship>(
             (dbRel) => new Relationship(dbRel.id, dbRel.rightSide, dbRel.referencedPK),
         );
-        entity.Constraints = dbEnt.constraints.map<IConstraint>((dbConstraint) =>
-             new Constraint(dbConstraint.attributes.split('|'), dbConstraint.id, dbConstraint.type)
-        )
+        entity.Constraints = dbEnt.constraints.map<IConstraint>((dbConstraint) => new Constraint(dbConstraint.attributes.split('|'), dbConstraint.id, dbConstraint.type));
         return entity;
     });
     return projectConfig;
+};
+
+export const parseConfigToDB = async (projectConfig: IProjectConfig, connection: Connection):
+Promise<[DBProject, DBEntity[], DBAttribute[], DBConstraint[], DBRelationship[]]> => {
+    const dbProject: DBProject = await connection.getRepository(DBProject)
+        .findOne({ id: projectConfig.Identifier });
+    let dbEntities : DBEntity[];
+    let dbAttributes : DBAttribute[];
+    let dbConstraints : DBConstraint[];
+    let dbRelationships : DBRelationship[];
+    if (dbProject) {
+        dbProject.type = projectConfig.Type;
+        dbEntities = projectConfig.Entities.map<DBEntity>((ent) => {
+            const dbEnt: DBEntity = new DBEntity(ent, dbProject);
+            dbAttributes = ent.Attributes
+                .map<DBAttribute>((attr) =>
+                    new DBAttribute(attr, dbEnt, ent.PK.includes(attr.Identifier)));
+            dbConstraints = ent.Constraints
+                .map<DBConstraint>((constr) => new DBConstraint(constr, dbEnt));
+            dbRelationships = ent.Relationships
+                .map<DBRelationship>((rel) => new DBRelationship(rel, dbEnt));
+            return dbEnt;
+        });
+    }
+    return [dbProject, dbEntities, dbAttributes, dbConstraints, dbRelationships];
 };
