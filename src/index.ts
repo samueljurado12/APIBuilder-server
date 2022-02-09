@@ -11,6 +11,8 @@ import DBEntity from './entity/DBEntity';
 import DBAttribute from './entity/DBAttribute';
 import DBConstraint from './entity/DBConstraint';
 import DBRelationship from './entity/DBRelationship';
+import IExporter from "./Helper/Exporter/IExporter";
+import {ExporterFactory} from "./Helper/Exporter/ExporterFactory";
 
 const app: Application = express();
 const port = 3000;
@@ -26,8 +28,7 @@ createConnection().then(async (connection) => {
         '/api/project/all',
         async (req: Request, res: Response): Promise<Response> => {
             const dbProjects: DBProject[] = await connection.getRepository(DBProject).find();
-            const projects : Project[] = [];
-            dbProjects.forEach((dbp) => projects.push(new Project(dbp)));
+            const projects : Project[] = dbProjects.map<Project>(dbp => new Project(dbp));
             return res.status(200).send({
                 projects,
             });
@@ -43,6 +44,24 @@ createConnection().then(async (connection) => {
             return res.status(200).json(project);
         },
     );
+
+    app.get(
+        '/api/project/:id/export',
+        async (req: Request, res: Response): Promise<Response> => {
+            const dbProject: DBProject = await connection.getRepository(DBProject)
+                .findOne({ id: req.params.id },
+                    {
+                        relations: ['entities',
+                            'entities.attributes',
+                            'entities.relationships',
+                            'entities.constraints',
+                        ],
+                    });
+            const exporter: IExporter = ExporterFactory(dbProject);
+            exporter.export();
+            return res.status(200).send("a");
+        }
+    )
 
     app.get(
         '/api/projectConfig/:id',
