@@ -57,8 +57,7 @@ createConnection().then(async (connection) => {
                             'entities.constraints',
                         ],
                     });
-            const exporter: IExporter = ExporterFactory(dbProject);
-            exporter.export();
+            await ExporterFactory(dbProject).export();
             return res.status(200).send("a");
         }
     )

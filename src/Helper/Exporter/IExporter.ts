@@ -4,8 +4,10 @@ abstract class IExporter {
     protected dbProject: DBProject;
     abstract async export();
 
-
-    protected constructor(dbProject: DBProject) {
+    protected formatString(input: string):string{
+        return input.trim().replace(/\s+/, '_');
+    }
+    constructor(dbProject: DBProject) {
         this.dbProject = dbProject;
     }
 }

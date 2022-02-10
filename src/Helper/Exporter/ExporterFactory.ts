@@ -8,10 +8,10 @@ export const ExporterFactory = (dbProject: DBProject): IExporter => {
     let exporter: IExporter;
     switch (dbProject.type) {
         case ProjectType.NoRelational:
-            exporter = new NonRelationalExporter();
+            exporter = new NonRelationalExporter(dbProject);
             break;
         case ProjectType.Relational:
-            exporter = new RelationalExporter();
+            exporter = new RelationalExporter(dbProject);
             break;
     }
     return exporter;

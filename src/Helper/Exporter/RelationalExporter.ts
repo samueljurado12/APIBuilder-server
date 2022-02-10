@@ -8,25 +8,25 @@ class RelationalExporter extends IExporter {
     protected dbProject: DBProject
 
     async export() {
+        const formattedName: string = this.formatString(this.dbProject.name);
         let sql: string = "";
-        sql += `CREATE SCHEMA ${this.dbProject.name};USE ${this.dbProject.name}`
+        sql += `CREATE SCHEMA ${formattedName};USE ${formattedName};`
         sql += await this.parseEntities(this.dbProject.entities)
     }
 
     parseEntities = async (entities: DBEntity[]): Promise<string>=>{
         let result: string;
 
-        entities.reduce<string>((reducer: string, ent): string => {
-            return reducer + `CREATE TABLE ${ent} (${this.parseAttributes(ent.attributes)})`
+        result = entities.reduce<string>((reducer: string, ent): string => {
+            return reducer + `CREATE TABLE ${this.formatString(ent.name)} (${this.parseAttributes(ent.attributes)},`+
+                ` PRIMARY KEY (${ent.attributes.filter(attr => attr.primaryKeyInd).map(attr => this.formatString(attr.name))}));`
         }, "")
 
         return result;
     }
 
     parseAttributes = (attributes: DBAttribute[]): string => {
-        return attributes.reduce<string>((reducer:string, attr): string => {
-            return reducer + `${attr.name} ${this.parseAttributeType(attr.type, attr.precision)}`;
-        }, "")
+        return attributes.map<string>(attr => { return `${this.formatString(attr.name)} ${this.parseAttributeType(attr.type, attr.precision)}`}).join(',')
     }
 
     parseAttributeType = (type: AttributeType, precision: number): string => {
