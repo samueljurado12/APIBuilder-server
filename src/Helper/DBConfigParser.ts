@@ -37,21 +37,21 @@ export const parseConfigToDB = async (projectConfig: IProjectConfig, connection:
 Promise<[DBProject, DBEntity[], DBAttribute[], DBConstraint[], DBRelationship[]]> => {
     const dbProject: DBProject = await connection.getRepository(DBProject)
         .findOne({ id: projectConfig.Identifier });
-    let dbEntities : DBEntity[];
-    let dbAttributes : DBAttribute[];
-    let dbConstraints : DBConstraint[];
-    let dbRelationships : DBRelationship[];
+    let dbEntities : DBEntity[] = [];
+    let dbAttributes : DBAttribute[] = [];
+    let dbConstraints : DBConstraint[] = [];
+    let dbRelationships : DBRelationship[] = [];
     if (dbProject) {
         dbProject.type = projectConfig.Type;
         dbEntities = projectConfig.Entities.map<DBEntity>((ent) => {
             const dbEnt: DBEntity = new DBEntity(ent, dbProject);
-            dbAttributes = ent.Attributes
+            dbAttributes = dbAttributes.concat(ent.Attributes
                 .map<DBAttribute>((attr) =>
-                    new DBAttribute(attr, dbEnt, ent.PK.includes(attr.Identifier)));
-            dbConstraints = ent.Constraints
-                .map<DBConstraint>((constr) => new DBConstraint(constr, dbEnt));
-            dbRelationships = ent.Relationships
-                .map<DBRelationship>((rel) => new DBRelationship(rel, dbEnt));
+                    new DBAttribute(attr, dbEnt, ent.PK.includes(attr.Identifier))));
+            dbConstraints = dbConstraints.concat(ent.Constraints
+                .map<DBConstraint>((constr) => new DBConstraint(constr, dbEnt)));
+            dbRelationships = dbRelationships.concat(ent.Relationships
+                .map<DBRelationship>((rel) => new DBRelationship(rel, dbEnt)));
             return dbEnt;
         });
     }
