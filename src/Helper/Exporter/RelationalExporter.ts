@@ -2,17 +2,19 @@ import IExporter from "./IExporter";
 import DBProject from "../../entity/DBProject";
 import DBEntity from "../../entity/DBEntity";
 import DBAttribute from "../../entity/DBAttribute";
-import {AttributeType} from "../../../../Api-Builder-Types";
+import {AttributeType, ConstraintType} from "api-builder-types";
 import DBRelationship from "../../entity/DBRelationship";
+import DBConstraint from "../../entity/DBConstraint";
 
 class RelationalExporter extends IExporter {
     protected dbProject: DBProject
 
-    async export() {
+    async export(): Promise<string> {
         const formattedName: string = this.formatString(this.dbProject.name);
         let sql: string = "";
-        sql += `CREATE SCHEMA ${formattedName};USE ${formattedName};`
-        sql += await this.parseEntities(this.dbProject.entities)
+        sql += `CREATE SCHEMA ${formattedName};USE ${formattedName};`;
+        sql += await this.parseEntities(this.orderEntities(this.dbProject.entities));
+        return sql;
     }
 
     parseEntities = async (entities: DBEntity[]): Promise<string>=>{
@@ -20,8 +22,9 @@ class RelationalExporter extends IExporter {
 
         result = entities.reduce<string>((reducer: string, ent): string => {
             return reducer + `CREATE TABLE ${this.formatString(ent.name)} (${this.parseAttributes(ent.attributes)}`+
-                ` ${this.parsePrimaryKeys(ent.attributes)}`+
-                `${this.parseRelationships(ent.relationships, entities)});`
+                `${this.parsePrimaryKeys(ent.attributes)}`+
+                `${this.parseRelationships(ent.relationships, entities)}` +
+                `${this.parseConstraints(ent.constraints, ent.attributes)});`
         }, "")
 
         return result;
@@ -37,6 +40,14 @@ class RelationalExporter extends IExporter {
             const ent: DBEntity = entities.find(ent => ent.id === rel.rightSide);
             const attr: DBAttribute = ent.attributes.find (attr => attr.id === rel.referencedPK);
             return `, FOREIGN KEY (${this.formatString(ent.name)}Id) REFERENCES ${this.formatString(ent.name)}(${attr.name})`;
+        }).join();
+    }
+
+    parseConstraints = (constraints: DBConstraint[], attributes: DBAttribute[]):string => {
+        return constraints.filter(c => c.type === ConstraintType.Unique).map(c => {
+            const attrIds = c.attributes.split('|');
+            const attrs: DBAttribute[] = attributes.filter(attr => attrIds.includes(attr.id));
+            return `, UNIQUE (${attrs.map(attr => this.formatString(attr.name)).join(',')})`;
         }).join();
     }
 
@@ -64,6 +75,19 @@ class RelationalExporter extends IExporter {
                 break;
         }
         return result;
+    }
+
+    orderEntities = (entities: DBEntity[]): DBEntity[] => {
+
+        const allRelationships: DBRelationship[] = entities.
+        reduce<DBRelationship[]>((red: DBRelationship[],ent) =>
+            red.concat(ent.relationships), []);
+        entities = entities.sort((ent1, ent2) => {
+            return allRelationships.filter(rel => ent1.relationships.includes(rel) && rel.rightSide === ent2.id).length -
+                allRelationships.filter(rel => ent2.relationships.includes(rel) && rel.rightSide === ent1.id).length
+        })
+
+        return entities;
     }
 
 }

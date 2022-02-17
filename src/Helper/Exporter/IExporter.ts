@@ -5,7 +5,7 @@ abstract class IExporter {
     abstract async export();
 
     protected formatString(input: string):string{
-        return input.trim().replace(/\s+/, '_');
+        return input.trim().replace(/\s+/g, '_');
     }
     constructor(dbProject: DBProject) {
         this.dbProject = dbProject;
