@@ -13,9 +13,21 @@ import DBConstraint from './entity/DBConstraint';
 import DBRelationship from './entity/DBRelationship';
 import IExporter from "./Helper/Exporter/IExporter";
 import {ExporterFactory} from "./Helper/Exporter/ExporterFactory";
+import {GeneratePackage} from "./Helper/PackageGenerator";
 
 const app: Application = express();
 const port = 3000;
+const getFullDBProject = async (connection, id): Promise<DBProject> => {
+    return await connection.getRepository(DBProject)
+        .findOne({ id: id },
+            {
+                relations: ['entities',
+                    'entities.attributes',
+                    'entities.relationships',
+                    'entities.constraints',
+                ],
+            });
+}
 
 createConnection().then(async (connection) => {
     await connection.synchronize();
@@ -48,16 +60,17 @@ createConnection().then(async (connection) => {
     app.get(
         '/api/project/:id/export',
         async (req: Request, res: Response): Promise<Response> => {
-            const dbProject: DBProject = await connection.getRepository(DBProject)
-                .findOne({ id: req.params.id },
-                    {
-                        relations: ['entities',
-                            'entities.attributes',
-                            'entities.relationships',
-                            'entities.constraints',
-                        ],
-                    });
+            const dbProject = await getFullDBProject(connection, req.params.id)
             await ExporterFactory(dbProject).export();
+            return res.status(200).send("a");
+        }
+    )
+
+    app.get(
+        '/api/project/:id/package',
+        async (req: Request, res: Response): Promise<Response> => {
+            const dbProject= await getFullDBProject(connection, req.params.id);
+            await GeneratePackage(dbProject);
             return res.status(200).send("a");
         }
     )
@@ -65,15 +78,7 @@ createConnection().then(async (connection) => {
     app.get(
         '/api/projectConfig/:id',
         async (req: Request, res: Response): Promise<Response> => {
-            const dbProject: DBProject = await connection.getRepository(DBProject)
-                .findOne({ id: req.params.id },
-                    {
-                        relations: ['entities',
-                            'entities.attributes',
-                            'entities.relationships',
-                            'entities.constraints',
-                        ],
-                    });
+            const dbProject = await getFullDBProject(connection, req.params.id)
             if (dbProject) {
                 const projectConfig: IProjectConfig = await parseDBToConfig(dbProject);
                 res.status(200).json(projectConfig);
