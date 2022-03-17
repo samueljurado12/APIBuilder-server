@@ -16,6 +16,7 @@
       "api-builder-types": "file:../Api-Builder-Types",
       "express": "^4.17.1",
       "guid-typescript": "^1.0.9",
+      "jszip": "^3.7.1",
       "mysql": "^2.14.1",
       "reflect-metadata": "^0.1.10",
       "typeorm": "0.2.28"

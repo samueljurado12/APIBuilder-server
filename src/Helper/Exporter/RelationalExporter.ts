@@ -5,13 +5,13 @@ import DBAttribute from "../../entity/DBAttribute";
 import {AttributeType, ConstraintType} from "api-builder-types";
 import DBRelationship from "../../entity/DBRelationship";
 import DBConstraint from "../../entity/DBConstraint";
-import {formatString} from "../StringFormatter";
+import {StringFormatter} from "../StringFormatter";
 
 class RelationalExporter extends IExporter {
     protected dbProject: DBProject
 
     async export(): Promise<string> {
-        const formattedName: string = formatString(this.dbProject.name);
+        const formattedName: string = StringFormatter(this.dbProject.name);
         let sql: string = "";
         sql += `CREATE SCHEMA ${formattedName};USE ${formattedName};`;
         sql += await this.parseEntities(this.orderEntities(this.dbProject.entities));
@@ -22,7 +22,7 @@ class RelationalExporter extends IExporter {
         let result: string;
 
         result = entities.reduce<string>((reducer: string, ent): string => {
-            return reducer + `CREATE TABLE ${formatString(ent.name)} (${this.parseAttributes(ent.attributes)}`+
+            return reducer + `CREATE TABLE ${StringFormatter(ent.name)} (${this.parseAttributes(ent.attributes)}`+
                 `${this.parsePrimaryKeys(ent.attributes)}`+
                 `${this.parseRelationships(ent.relationships, entities)}` +
                 `${this.parseConstraints(ent.constraints, ent.attributes)});`
@@ -32,7 +32,7 @@ class RelationalExporter extends IExporter {
     }
 
     parsePrimaryKeys = (attributes: DBAttribute[]): string => {
-        const pks: string[] = attributes.filter(attr => attr.primaryKeyInd).map(attr => formatString(attr.name));
+        const pks: string[] = attributes.filter(attr => attr.primaryKeyInd).map(attr => StringFormatter(attr.name));
         return pks.length > 0 ? `, PRIMARY KEY (${pks.join(',')})` : '';
     }
 
@@ -40,7 +40,7 @@ class RelationalExporter extends IExporter {
         return relationships.map(rel => {
             const ent: DBEntity = entities.find(ent => ent.id === rel.rightSide);
             const attr: DBAttribute = ent.attributes.find (attr => attr.id === rel.referencedPK);
-            return `, FOREIGN KEY (${formatString(ent.name)}Id) REFERENCES ${formatString(ent.name)}(${attr.name})`;
+            return `, FOREIGN KEY (${StringFormatter(ent.name)}Id) REFERENCES ${StringFormatter(ent.name)}(${attr.name})`;
         }).join();
     }
 
@@ -48,12 +48,12 @@ class RelationalExporter extends IExporter {
         return constraints.filter(c => c.type === ConstraintType.Unique).map(c => {
             const attrIds = c.attributes.split('|');
             const attrs: DBAttribute[] = attributes.filter(attr => attrIds.includes(attr.id));
-            return `, UNIQUE (${attrs.map(attr => formatString(attr.name)).join(',')})`;
+            return `, UNIQUE (${attrs.map(attr => StringFormatter(attr.name)).join(',')})`;
         }).join();
     }
 
     parseAttributes = (attributes: DBAttribute[]): string => {
-        return attributes.map<string>(attr => { return `${formatString(attr.name)} ` +
+        return attributes.map<string>(attr => { return `${StringFormatter(attr.name)} ` +
             `${this.parseAttributeType(attr.type, attr.precision)}` +
             `${attr.mandatoryInd ? ' NOT NULL':''}` +
         `${attr.defaultValue !== null ? ` DEFAULT ${attr.defaultValue}` : ''} `}).join(',')

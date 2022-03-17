@@ -1,0 +1,5 @@
+## Running Instructions ##
+TODO Requirements (docker, docker-compose...)
+1. Modify Root password inside files/ProjectName-compose.yml
+2. Run ProjectName.sh
+3. When prompted for password, introduce same password as in files/ProjectName-compose.yml

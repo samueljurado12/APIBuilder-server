@@ -1,22 +1,31 @@
 import DBProject from "../entity/DBProject";
-import {ProjectType} from "../../../Api-Builder-Types";
+import {ProjectType} from "api-builder-types";
 import RelationalExporter from "./Exporter/RelationalExporter";
-import {formatString} from "./StringFormatter";
+import StringFormatter from "./StringFormatter";
+import * as path from "path";
+import FileSaver from "./FileSaver";
 
 const fs = require('fs')
 
 export const GeneratePackage = async (dbProject: DBProject): Promise<string> => {
     if(dbProject.type === ProjectType.NoRelational) return;
 
-    const formattedProjectName = formatString(dbProject.name)
-    const generatedFilePath = `./${formattedProjectName}/${formattedProjectName}`;
+    const formattedProjectName = StringFormatter(dbProject.name);
+    const packagePath = path.join(__dirname,`../../Generated/${formattedProjectName}`);
+    const templatesPath = path.join(__dirname, '../../Templates');
     const sqlSchema = await (new RelationalExporter(dbProject).export());
 
-    let modifiedTemplate = fs.readFileSync('/Templates/compose.yml', 'utf-8');
-    modifiedTemplate.replace('ProjectName', formattedProjectName);
-    fs.writeFileSync(`${generatedFilePath}-compose.yml`, modifiedTemplate);
-    fs.writeFileSync(`${generatedFilePath}-schema.sql`, sqlSchema)
+    FileSaver(`${packagePath}/files/${formattedProjectName}-compose.yml`,
+        ModifyTemplate(`${templatesPath}/compose.yml`, formattedProjectName));
+    FileSaver(`${packagePath}/files/${formattedProjectName}-schema.sql`, sqlSchema);
+    FileSaver(`${packagePath}/${formattedProjectName}.sh`,
+        ModifyTemplate(`${templatesPath}/script.sh`, formattedProjectName))
+    FileSaver(`${packagePath}/running-instructions.txt`,
+        ModifyTemplate(`${templatesPath}/running-instructions.txt`, formattedProjectName))
 
+    return '';
+}
 
-    return "";
+const ModifyTemplate = (templatePath:string , projectName: string): string => {
+    return fs.readFileSync(templatePath, 'utf-8').replace('ProjectName', projectName);
 }
