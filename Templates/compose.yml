@@ -1,0 +1,13 @@
+version: "3.7"
+
+services:
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - ProjectName:/var/lib.mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Pas5w0rd! # EDIT THIS IN YOUR FINAL FILE
+      MYSQL_DATABASE: ProjectName
+
+volumes:
+  ProjectName:
