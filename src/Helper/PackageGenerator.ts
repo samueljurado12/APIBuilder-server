@@ -1,31 +1,34 @@
-import DBProject from "../entity/DBProject";
-import {ProjectType} from "api-builder-types";
-import RelationalExporter from "./Exporter/RelationalExporter";
-import StringFormatter from "./StringFormatter";
-import * as path from "path";
-import FileSaver from "./FileSaver";
+import { ProjectType } from 'api-builder-types';
+import * as path from 'path';
+import DBProject from '../entity/DBProject';
+import RelationalExporter from './Exporter/RelationalExporter';
+import StringFormatter from './StringFormatter';
 
-const fs = require('fs')
+const fs = require('fs');
+const JSZip = require('jszip');
 
-export const GeneratePackage = async (dbProject: DBProject): Promise<string> => {
-    if(dbProject.type === ProjectType.NoRelational) return;
+const ModifyTemplate = (templatePath:string, projectName: string): string => {
+    const str = fs.readFileSync(templatePath, 'utf-8');
+    return str.replace(/ProjectName/g, projectName);
+};
 
+const GeneratePackage = async (dbProject: DBProject): Promise<string> => {
+    if (dbProject.type === ProjectType.NoRelational) return '';
+
+    const zip = new JSZip();
     const formattedProjectName = StringFormatter(dbProject.name);
-    const packagePath = path.join(__dirname,`../../Generated/${formattedProjectName}`);
     const templatesPath = path.join(__dirname, '../../Templates');
     const sqlSchema = await (new RelationalExporter(dbProject).export());
 
-    FileSaver(`${packagePath}/files/${formattedProjectName}-compose.yml`,
+    zip.folder('files').file(`${formattedProjectName}-compose.yml`,
         ModifyTemplate(`${templatesPath}/compose.yml`, formattedProjectName));
-    FileSaver(`${packagePath}/files/${formattedProjectName}-schema.sql`, sqlSchema);
-    FileSaver(`${packagePath}/${formattedProjectName}.sh`,
-        ModifyTemplate(`${templatesPath}/script.sh`, formattedProjectName))
-    FileSaver(`${packagePath}/running-instructions.txt`,
-        ModifyTemplate(`${templatesPath}/running-instructions.txt`, formattedProjectName))
+    zip.folder('files').file(`${formattedProjectName}-schema.sql`, sqlSchema);
+    zip.file(`${formattedProjectName}.sh`,
+        ModifyTemplate(`${templatesPath}/script.sh`, formattedProjectName));
+    zip.file('running-instructions.txt',
+        ModifyTemplate(`${templatesPath}/running-instructions.txt`, formattedProjectName));
 
-    return '';
-}
+    return zip.generateAsync({ type: 'base64' });
+};
 
-const ModifyTemplate = (templatePath:string , projectName: string): string => {
-    return fs.readFileSync(templatePath, 'utf-8').replace('ProjectName', projectName);
-}
+export default GeneratePackage;

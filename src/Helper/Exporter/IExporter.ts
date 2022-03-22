@@ -1,7 +1,8 @@
-import DBProject from "../../entity/DBProject";
+import DBProject from '../../entity/DBProject';
 
 abstract class IExporter {
     protected dbProject: DBProject;
+
     abstract async export();
 
     constructor(dbProject: DBProject) {

@@ -1,5 +1,3 @@
-const StringFormatter = (input: string):string => {
-    return input.trim().replace(/\s+/g, '_');
-}
+const StringFormatter = (input: string):string => input.trim().replace(/\s+/g, '_');
 
 export default StringFormatter;

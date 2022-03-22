@@ -1,18 +1,19 @@
-import DBProject from "../../entity/DBProject";
-import IExporter from "./IExporter";
-import {ProjectType} from "api-builder-types";
-import NonRelationalExporter from "./NonRelationalExporter";
-import RelationalExporter from "./RelationalExporter";
+import { ProjectType } from 'api-builder-types';
+import DBProject from '../../entity/DBProject';
+import IExporter from './IExporter';
+import RelationalExporter from './RelationalExporter';
 
-export const ExporterFactory = (dbProject: DBProject): IExporter => {
+const ExporterFactory = (dbProject: DBProject): IExporter => {
     let exporter: IExporter;
     switch (dbProject.type) {
-        case ProjectType.NoRelational:
-            exporter = new NonRelationalExporter(dbProject);
-            break;
         case ProjectType.Relational:
             exporter = new RelationalExporter(dbProject);
             break;
+        default:
+            exporter = null;
+            break;
     }
     return exporter;
-}
+};
+
+export default ExporterFactory;
