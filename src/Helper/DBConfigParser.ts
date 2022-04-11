@@ -1,7 +1,7 @@
 import {
     IAttribute, IConstraint, IEntity, IProjectConfig, IRelationship,
 } from 'api-builder-types';
-import { Connection } from 'typeorm';
+import {getRepository} from 'typeorm';
 import DBProject from '../entity/DBProject';
 import ProjectConfig from '../TypeImplementation/ProjectConfig';
 import Entity from '../TypeImplementation/Entity';
@@ -33,10 +33,10 @@ export const parseDBToConfig = async (dbProject: DBProject): Promise<ProjectConf
     return projectConfig;
 };
 
-export const parseConfigToDB = async (projectConfig: IProjectConfig, connection: Connection):
+export const parseConfigToDB = async (projectConfig: IProjectConfig, userId: string):
 Promise<[DBProject, DBEntity[], DBAttribute[], DBConstraint[], DBRelationship[]]> => {
-    const dbProject: DBProject = await connection.getRepository(DBProject)
-        .findOne({ id: projectConfig.Identifier });
+    const dbProject: DBProject = await getRepository(DBProject)
+        .findOne({ where:{id: projectConfig.Identifier, ownerId:userId }});
     let dbEntities : DBEntity[] = [];
     let dbAttributes : DBAttribute[] = [];
     let dbConstraints : DBConstraint[] = [];
