@@ -1,3 +1,3 @@
 export default {
-    jwtSecret: "@S3CRET"
+    jwtSecret: '@S3CRET',
 };

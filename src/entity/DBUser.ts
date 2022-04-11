@@ -28,16 +28,16 @@ class DBUser {
     hashedPassword: string;
 
     @Column({
-        type: "varchar",
+        type: 'varchar',
         length: 100,
-        unique: true
+        unique: true,
     })
     email: string;
 
     @Column({
-        type: "varchar",
+        type: 'varchar',
         length: (100),
-        unique: true
+        unique: true,
     })
     username: string;
 
