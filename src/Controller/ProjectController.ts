@@ -77,6 +77,14 @@ class ProjectController {
             });
         }
 
+        const validation = ProjectValidator.validate(dbProject);
+        if(!validation.isOk){
+            return res.status(400).send({
+                message: "Please, fix the following errors before exporting the project",
+                errors: validation.errorMessages
+            });
+        }
+
         GeneratePackage(dbProject).then((base64) => {
             if (base64 === '') {
                 res.status(500)
@@ -124,7 +132,7 @@ class ProjectController {
             });
         }
         await getRepository(DBProject).delete(dbProject.id);
-        return res.status(200).json({ message: 'Deleted succesfully' });
+        return res.status(200).json({ message: 'Deleted successfully' });
     };
 }
 

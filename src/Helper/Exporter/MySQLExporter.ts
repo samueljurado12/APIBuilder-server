@@ -7,7 +7,7 @@ import DBRelationship from '../../entity/DBRelationship';
 import DBConstraint from '../../entity/DBConstraint';
 import StringFormatter from '../StringFormatter';
 
-class RelationalExporter extends ExporterAbstract {
+class MySQLExporter extends ExporterAbstract {
 
     async export(project: DBProject): Promise<string> {
         const formattedName: string = StringFormatter(project.name);
@@ -56,4 +56,4 @@ class RelationalExporter extends ExporterAbstract {
 
 }
 
-export default RelationalExporter;
+export default MySQLExporter;
