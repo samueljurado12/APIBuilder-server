@@ -18,7 +18,7 @@ const GeneratePackage = async (dbProject: DBProject): Promise<string> => {
     const zip = new JSZip();
     const formattedProjectName = StringFormatter(dbProject.name);
     const templatesPath = path.join(__dirname, '../../Templates');
-    const sqlSchema = await (new RelationalExporter(dbProject).export());
+    const sqlSchema = await (new RelationalExporter().export(dbProject));
 
     zip.folder('files').file(`${formattedProjectName}-compose.yml`,
         ModifyTemplate(`${templatesPath}/compose.yml`, formattedProjectName));

@@ -27,7 +27,8 @@ export const parseDBToConfig = async (dbProject: DBProject): Promise<ProjectConf
             .map<IRelationship>(
             (dbRel) => new Relationship(dbRel.id, dbRel.rightSide, dbRel.referencedPK),
         );
-        entity.Constraints = dbEnt.constraints.map<IConstraint>((dbConstraint) => new Constraint(dbConstraint.attributes.split('|'), dbConstraint.id, dbConstraint.type));
+        entity.Constraints = dbEnt.constraints.map<IConstraint>((dbConstraint) =>
+            new Constraint(dbConstraint.attributes.split('|'), dbConstraint.id, dbConstraint.type));
         return entity;
     });
     return projectConfig;
@@ -36,7 +37,7 @@ export const parseDBToConfig = async (dbProject: DBProject): Promise<ProjectConf
 export const parseConfigToDB = async (projectConfig: IProjectConfig, userId: string):
 Promise<[DBProject, DBEntity[], DBAttribute[], DBConstraint[], DBRelationship[]]> => {
     const dbProject: DBProject = await getRepository(DBProject)
-        .findOne({ where: { id: projectConfig.Identifier, ownerId: userId } });
+        .findOne({ where: { id: projectConfig.Identifier, owner: userId } });
     let dbEntities : DBEntity[] = [];
     let dbAttributes : DBAttribute[] = [];
     let dbConstraints : DBConstraint[] = [];

@@ -8,12 +8,15 @@ import StringFormatter from '../Helper/StringFormatter';
 import getFullDBProject from '../Helper/GetFullDBProject';
 import GeneratePackage from '../Helper/PackageGenerator';
 import DBUser from '../entity/DBUser';
+import ProjectValidator from "../Validator/ProjectValidator";
 
 class ProjectController {
+
+
     static all = async (req: Request, res: Response): Promise<Response> => {
-        const { userId } = res.locals.jwtPayload;
+        const { userId } = res.locals.jwtPayload
         const dbProjects: DBProject[] = await getRepository(DBProject)
-            .find({ where: { userId } });
+            .find({ where: { owner: userId } });
         const projects : Project[] = dbProjects.map<Project>((dbp) => new Project(dbp));
         return res.status(200).send({
             projects,
@@ -23,7 +26,7 @@ class ProjectController {
     static id = async (req: Request, res: Response): Promise<Response> => {
         const { userId } = res.locals.jwtPayload;
         const dbProject: DBProject = await getRepository(DBProject)
-            .findOneOrFail({ where: { id: req.params.id, userId } });
+            .findOneOrFail({ where: { id: req.params.id, owner: userId } });
         const project : IProject = new Project(dbProject);
         if (project) {
             res.status(200).json(project);
@@ -43,12 +46,19 @@ class ProjectController {
                 error: `Project with id '${req.params.id}' not found.`,
             });
         }
+        const validation = ProjectValidator.validate(dbProject);
+        if(!validation.isOk){
+            return res.status(400).send({
+                message: "Please, fix the following errors before exporting the project",
+                errors: validation.errorMessages
+            });
+        }
 
         const exporter = ExporterFactory(dbProject);
         if (exporter === null) {
             res.status(501).send('Error: Exporter not implemented for Project Type');
         }
-        exporter.export().then((schema) => {
+        exporter.export(dbProject).then((schema) => {
             res.writeHead(200, {
                 'Content-Type': 'text/sql',
                 'Content-disposition': `attachment; filename=${StringFormatter(dbProject.name)}-schema.sql`,
