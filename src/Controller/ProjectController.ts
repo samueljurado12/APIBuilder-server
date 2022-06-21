@@ -3,12 +3,12 @@ import { getRepository } from 'typeorm';
 import { IProject } from 'api-builder-types';
 import DBProject from '../entity/DBProject';
 import Project from '../TypeImplementation/Project';
-import ExporterFactory from '../Helper/Exporter/ExporterFactory';
 import StringFormatter from '../Helper/StringFormatter';
 import getFullDBProject from '../Helper/GetFullDBProject';
 import GeneratePackage from '../Helper/PackageGenerator';
 import DBUser from '../entity/DBUser';
 import ProjectValidator from "../Validator/ProjectValidator";
+import {parseDBToConfig} from "../Helper/DBConfigParser";
 
 class ProjectController {
 
@@ -46,24 +46,13 @@ class ProjectController {
                 error: `Project with id '${req.params.id}' not found.`,
             });
         }
-        const validation = ProjectValidator.validate(dbProject);
-        if(!validation.isOk){
-            return res.status(400).send({
-                message: "Please, fix the following errors before exporting the project",
-                errors: validation.errorMessages
-            });
-        }
 
-        const exporter = ExporterFactory(dbProject);
-        if (exporter === null) {
-            res.status(501).send('Error: Exporter not implemented for Project Type');
-        }
-        exporter.export(dbProject).then((schema) => {
+        parseDBToConfig(dbProject).then((config) => {
             res.writeHead(200, {
-                'Content-Type': 'text/sql',
-                'Content-disposition': `attachment; filename=${StringFormatter(dbProject.name)}-schema.sql`,
+                'Content-Type': 'application.json',
+                'Content-disposition': `attachment; filename=${dbProject.name}`,
             });
-            res.end(schema);
+            res.end(config);
         });
         return res;
     };
