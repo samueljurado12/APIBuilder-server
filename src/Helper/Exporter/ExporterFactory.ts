@@ -1,13 +1,13 @@
 import { ProjectType } from 'api-builder-types';
 import DBProject from '../../entity/DBProject';
-import IExporter from './IExporter';
-import RelationalExporter from './RelationalExporter';
+import ExporterAbstract from './ExporterAbstract';
+import MySQLExporter from './MySQLExporter';
 
-const ExporterFactory = (dbProject: DBProject): IExporter => {
-    let exporter: IExporter;
+const ExporterFactory = (dbProject: DBProject): ExporterAbstract => {
+    let exporter: ExporterAbstract;
     switch (dbProject.type) {
         case ProjectType.Relational:
-            exporter = new RelationalExporter(dbProject);
+            exporter = new MySQLExporter();
             break;
         default:
             exporter = null;

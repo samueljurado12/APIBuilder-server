@@ -3,17 +3,20 @@ import { getRepository } from 'typeorm';
 import { IProject } from 'api-builder-types';
 import DBProject from '../entity/DBProject';
 import Project from '../TypeImplementation/Project';
-import ExporterFactory from '../Helper/Exporter/ExporterFactory';
 import StringFormatter from '../Helper/StringFormatter';
 import getFullDBProject from '../Helper/GetFullDBProject';
 import GeneratePackage from '../Helper/PackageGenerator';
 import DBUser from '../entity/DBUser';
+import ProjectValidator from "../Validator/ProjectValidator";
+import {parseDBToConfig} from "../Helper/DBConfigParser";
 
 class ProjectController {
+
+
     static all = async (req: Request, res: Response): Promise<Response> => {
-        const { userId } = res.locals.jwtPayload;
+        const { userId } = res.locals.jwtPayload
         const dbProjects: DBProject[] = await getRepository(DBProject)
-            .find({ where: { userId } });
+            .find({ where: { owner: userId } });
         const projects : Project[] = dbProjects.map<Project>((dbp) => new Project(dbp));
         return res.status(200).send({
             projects,
@@ -23,7 +26,7 @@ class ProjectController {
     static id = async (req: Request, res: Response): Promise<Response> => {
         const { userId } = res.locals.jwtPayload;
         const dbProject: DBProject = await getRepository(DBProject)
-            .findOneOrFail({ where: { id: req.params.id, userId } });
+            .findOneOrFail({ where: { id: req.params.id, owner: userId } });
         const project : IProject = new Project(dbProject);
         if (project) {
             res.status(200).json(project);
@@ -44,16 +47,12 @@ class ProjectController {
             });
         }
 
-        const exporter = ExporterFactory(dbProject);
-        if (exporter === null) {
-            res.status(501).send('Error: Exporter not implemented for Project Type');
-        }
-        exporter.export().then((schema) => {
+        parseDBToConfig(dbProject).then((config) => {
             res.writeHead(200, {
-                'Content-Type': 'text/sql',
-                'Content-disposition': `attachment; filename=${StringFormatter(dbProject.name)}-schema.sql`,
+                'Content-Type': 'application.json',
+                'Content-disposition': `attachment; filename=${dbProject.name}`,
             });
-            res.end(schema);
+            res.end(config);
         });
         return res;
     };
@@ -64,6 +63,14 @@ class ProjectController {
         if (!dbProject) {
             return res.status(404).send({
                 error: `Project with id '${req.params.id}' not found.`,
+            });
+        }
+
+        const validation = ProjectValidator.validate(dbProject);
+        if(!validation.isOk){
+            return res.status(400).send({
+                message: "Please, fix the following errors before exporting the project",
+                errors: validation.errorMessages
             });
         }
 
@@ -114,7 +121,7 @@ class ProjectController {
             });
         }
         await getRepository(DBProject).delete(dbProject.id);
-        return res.status(200).json({ message: 'Deleted succesfully' });
+        return res.status(200).json({ message: 'Deleted successfully' });
     };
 }
 

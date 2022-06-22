@@ -34,12 +34,25 @@ class ProjectConfigController {
                 error: `Project with id '${config.Identifier}' not found.`,
             });
         }
+        const projectActualState = await getFullDBProject(dbProject.id, userId);
+        const allAttributeIds = [].concat(...(projectActualState.entities.map(e => e.attributes.map(a=>a.id))));
+        const allConstraintIds = [].concat(...(projectActualState.entities.map(e => e.constraints.map(c=>c.id))));
+        const allRelationShipIds = [].concat(...(projectActualState.entities.map(e => e.relationships.map(r=>r.id))));
+        const dbEntitiesIdsToBeRemoved = projectActualState.entities.filter(e => !dbEntities.map(e=>e.id).includes(e.id))
+            .map(e=>e.id);
+        const dbAttributesIdsToBeRemoved = allAttributeIds.filter(a => !dbAttributes.map(a=>a.id).includes(a));
+        const dbConstraintsIdsToBeRemoved = allConstraintIds.filter(c => !dbConstraints.map(c=>c.id).includes(c));
+        const dbRelationshipsIdsToBeRemoved = allRelationShipIds.filter(r => !dbRelationships.map(r=>r.id).includes(r));
         try {
             await getRepository(DBProject).save(dbProject);
             await getRepository(DBEntity).save(dbEntities);
             await getRepository(DBAttribute).save(dbAttributes);
             await getRepository(DBConstraint).save(dbConstraints);
             await getRepository(DBRelationship).save(dbRelationships);
+            if(dbEntitiesIdsToBeRemoved.length > 0) await getRepository(DBEntity).delete(dbEntitiesIdsToBeRemoved);
+            if(dbAttributesIdsToBeRemoved.length > 0) await getRepository(DBAttribute).delete(dbAttributesIdsToBeRemoved);
+            if(dbConstraintsIdsToBeRemoved.length > 0) await getRepository(DBConstraint).delete(dbConstraintsIdsToBeRemoved);
+            if(dbRelationshipsIdsToBeRemoved.length > 0) await getRepository(DBRelationship).delete(dbRelationshipsIdsToBeRemoved);
         } catch (e) {
             console.log(e);
         }

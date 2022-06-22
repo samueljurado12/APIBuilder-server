@@ -1,7 +1,7 @@
 import { ProjectType } from 'api-builder-types';
 import * as path from 'path';
 import DBProject from '../entity/DBProject';
-import RelationalExporter from './Exporter/RelationalExporter';
+import MySQLExporter from './Exporter/MySQLExporter';
 import StringFormatter from './StringFormatter';
 
 const fs = require('fs');
@@ -18,7 +18,7 @@ const GeneratePackage = async (dbProject: DBProject): Promise<string> => {
     const zip = new JSZip();
     const formattedProjectName = StringFormatter(dbProject.name);
     const templatesPath = path.join(__dirname, '../../Templates');
-    const sqlSchema = await (new RelationalExporter(dbProject).export());
+    const sqlSchema = await (new MySQLExporter().export(dbProject));
 
     zip.folder('files').file(`${formattedProjectName}-compose.yml`,
         ModifyTemplate(`${templatesPath}/compose.yml`, formattedProjectName));
