@@ -47,12 +47,20 @@ class ProjectController {
             });
         }
 
+        const validation = ProjectValidator.validate(dbProject);
+        if(!validation.isOk){
+            return res.status(400).send({
+                message: "Please, fix the following errors before exporting the project",
+                errors: validation.errorMessages
+            });
+        }
+
         parseDBToConfig(dbProject).then((config) => {
             res.writeHead(200, {
                 'Content-Type': 'application.json',
-                'Content-disposition': `attachment; filename=${dbProject.name}`,
+                'Content-disposition': `attachment; filename=${StringFormatter(dbProject.name)}.json`,
             });
-            res.end(config);
+            res.end(JSON.stringify(config));
         });
         return res;
     };

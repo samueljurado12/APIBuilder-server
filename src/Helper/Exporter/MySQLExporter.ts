@@ -46,7 +46,8 @@ class MySQLExporter extends ExporterAbstract {
         constraints.filter((c) => c.type === ConstraintType.Unique).map((c) => {
         const attrIds = c.attributes.split('|');
         const attrs: DBAttribute[] = attributes.filter((attr) => attrIds.includes(attr.id));
-        return `, UNIQUE (${attrs.map((attr) => StringFormatter(attr.name)).join(',')})`;
+        const indexName = `UNIQUE_${attrs.map((attr) => StringFormatter(attr.name)).join('_')}`
+        return `, CONSTRAINT ${indexName} UNIQUE (${attrs.map((attr) => StringFormatter(attr.name)).join(',')})`;
     }).join('');
 
     parseAttributes = (attributes: DBAttribute[]): string => attributes.map<string>((attr) => `${StringFormatter(attr.name)} `
